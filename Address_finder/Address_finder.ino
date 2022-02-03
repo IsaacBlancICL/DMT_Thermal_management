@@ -7,6 +7,13 @@ I'm following a tutorial (link below) on interfacing multiple DS18B20 temperatur
 with an Arduino. The code is copied from there with no changes other than this comment.
 
 https://lastminuteengineers.com/multiple-ds18b20-arduino-tutorial/
+
+Requires 'DallasTemperature' and 'OneWire' libraries, both of which can be installed by
+going Sketch > Include Library > Manage Libararies and then typing in DallasTemperature.
+Click instal and it'll ask if you want to instal OneWire as well. Click yes.
+
+DallasTemperature documentation:
+https://github.com/milesburton/Arduino-Temperature-Control-Library
 */
 
 #include <OneWire.h>
