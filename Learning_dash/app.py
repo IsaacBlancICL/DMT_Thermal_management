@@ -47,8 +47,23 @@ app.layout = dbc.Container([
 ], fluid=True)
 
 
-# CALLBACKS
-
+# CALLBACKS (finish once I've got data coming into pandas ready to graph)
+# colourplot
+@app.callback(
+    Output('FIGURE_colourplot', 'figure'),
+    Input('SLIDER_colourplot', 'value')
+)
+def update_graph(value):
+    fig = 
+    return fig
+# sensor temps line graph
+@app.callback(
+    Output('FIGURE_temps_line', 'figure'),
+    Input('DROPDOWN_temps_line', 'value')
+)
+def update_graph(value):
+    fig = 
+    return fig
 
              
 # RUNNING DASHBOARD
