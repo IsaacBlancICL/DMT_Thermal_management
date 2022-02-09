@@ -21,8 +21,10 @@ app = Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
 # LAYOUT
 app.layout = dbc.Container([
     # title and intro text
+    dbc.Row(html.Br()),
     dbc.Row(dbc.Col(html.H1("Thermal management dashboard"),width=6)),
     dbc.Row(dbc.Col(html.P("This is very much a work-in-progress, but I'm hoping to have lots of nice graphs here. For now, I want a colourplot with a slider for adjusting depth, a multi-series line graph where you can choose which sensors to look at, and a pie chart for phase fractions. Also maybe another line graph showing history of phase fractions. Maybe also some state of charge estimation."),width=6)),
+    dbc.Row(html.Br()),
     # first row - colourplot and sensor temps line graph
     dbc.Row([
         # colourplot
