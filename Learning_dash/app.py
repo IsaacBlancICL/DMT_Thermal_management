@@ -1,24 +1,26 @@
 # copied from tutorial: https://dash.plotly.com/layout
+# run the code and go to http://127.0.0.1:8050/ in your web browser.
 
-# Run this app with `python app.py` and
-# visit http://127.0.0.1:8050/ in your web browser.
 
 # IMPORTING LIBRARIES
 from dash import Dash, html, dcc
-import plotly.express as px
-import pandas as pd
+import plotly.graph_objects as go
 
+
+# CREATING DATA AND FIGURE
+fig = go.Figure(data =
+    go.Contour(
+        z=[[10, 10.625, 12.5, 15.625, 20],
+           [5.625, 6.25, 8.125, 11.25, 15.625],
+           [2.5, 3.125, 5., 8.125, 12.5],
+           [0.625, 1.25, 3.125, 6.25, 10.625],
+           [0, 0.625, 2.5, 5.625, 10]]
+    ))
+fig.show()
+
+
+# MAKING DASHBOARD
 app = Dash(__name__)
-
-# assume you have a "long-form" data frame
-# see https://plotly.com/python/px-arguments/ for more options
-df = pd.DataFrame({
-    "Fruit": ["Apples", "Oranges", "Bananas", "Apples", "Oranges", "Bananas"],
-    "Amount": [4, 1, 2, 2, 4, 5],
-    "City": ["SF", "SF", "SF", "Montreal", "Montreal", "Montreal"]
-})
-
-fig = px.bar(df, x="Fruit", y="Amount", color="City", barmode="group")
 
 app.layout = html.Div(children=[
     html.H1(children='Hello Dash'),
@@ -33,5 +35,7 @@ app.layout = html.Div(children=[
     )
 ])
 
+             
+# RUNNING DASHBOARD
 if __name__ == '__main__':
     app.run_server(debug=True)
