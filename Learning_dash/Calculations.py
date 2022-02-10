@@ -36,6 +36,7 @@ sensor_locs = np.array( [[ 60,  72,  49],
                          [300, 124,  97],
                          [300, 229,  97]] )
 
+
 # DECLARING FUNCTIONS
 def domain_interp(domain, sensor_locs, readings):
     # sensor values
@@ -43,6 +44,20 @@ def domain_interp(domain, sensor_locs, readings):
     # interpolation
     interp_vals = griddata(sensor_locs, sensor_vals, domain, method='linear')
     return interp_vals
+
+def phase_fractions(interp_vals):
+    # temperature of fusion
+    t_fusion = 74
+    # total number of points in domain
+    total_parts  = np.prod(np.shape(interp_vals))
+    # liquid phase
+    liquid_parts = np.count_nonzero(interp_vals > t_fusion)
+    liquid_frac  = liquid_parts/total_parts
+    # solid phase
+    solid_parts  = np.count_nonzero(interp_vals < t_fusion)
+    solid_frac   = solid_parts/total_parts
+    # return fractions
+    return solid_frac, liquid_frac
 
 
 # TESTING FUNCTIONS
