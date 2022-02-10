@@ -23,7 +23,7 @@ def domain_interp(readings):
     X = np.arange(0,427,1)
     Y = np.arange(0,294,1)
     Z = np.arange(0,168,1)
-    domain_points = np.meshgrid(X,Y,Z)
+    X,Y,Z = np.meshgrid(X,Y,Z)
     
     # SENSORS
     # locations for all 8 sensors stored as coordinates [x,y,z]
@@ -46,7 +46,9 @@ def domain_interp(readings):
     fig_locs.write_html("sensor_locations.html")
     
     # INTERPOLATION
+    interp_vals = griddata(sensor_locs, sensor_vals, (X,Y,Z), method='nearest')
     
+    return interp_vals
 
 # TESTING FUNCTIONS
-domain_interp(readings)
+result = domain_interp(readings)
