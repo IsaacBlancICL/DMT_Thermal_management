@@ -62,6 +62,6 @@ fig = go.Figure(data=go.Volume(
     surface_count=17, # needs to be a large number for good volume rendering
     ))
 # sensor locations
-fig.add_trace(go.Scatter3d(x=sensor_locs[:,0], y=sensor_locs[:,1], z=sensor_locs[:,2], mode='markers'))
+fig.add_trace(go.Scatter3d(x=sensor_locs[:,0], y=sensor_locs[:,1], z=sensor_locs[:,2], mode='markers', marker={'color':'green'}))
 # save the result
 fig.write_html("volume.html")
