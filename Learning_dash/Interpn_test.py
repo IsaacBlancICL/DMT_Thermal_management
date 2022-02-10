@@ -1,5 +1,12 @@
 '''
-playing around with 3D meshgrid interpolation
+playing around with interpn function
+
+In the end, I realised this was the wrong function to use because
+it requires data that is structured across the grid (ie: a datapoint
+for every point in the grid). Instead, I found that griddata is the
+right function to use, however I'm keeping this Python file because
+it contains useful numbers describing the positions of the sensors
+(from the CAD) and the PCM dimensions (also from the CAD).
 '''
 
 # IMPORTING LIBRARIES
