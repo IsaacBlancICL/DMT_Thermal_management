@@ -18,10 +18,11 @@ df = pd.DataFrame(columns = ['Time', 'Sensor 1', 'Sensor 2', 'Sensor 3', 'Sensor
 
 # reading serial to list
 serialLine = ser.readline().decode('ascii')
-sensor_list = # serialLine
+sensor_list = # string to list
+sensor_vals = np.array(sensor_list).transpose()
 
 # calculating stuff
-interp_vals = domain_interp(domain, sensor_locs, readings)
+interp_vals = domain_interp(X,Y,Z, x,y,z, sensor_vals)
 calcs_list = SoC(interp_vals)
 
 # putting calculation results in DataFrame
