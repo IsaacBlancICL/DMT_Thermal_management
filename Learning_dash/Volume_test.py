@@ -1,6 +1,8 @@
 '''
 copied from https://plotly.com/python/3d-volume-plots/
 trying to export to html, as described in https://plotly.com/python/interactive-html-export/
+
+Figured it all out - see description of previous commit for details.
 '''
 
 import plotly.graph_objects as go
