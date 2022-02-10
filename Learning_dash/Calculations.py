@@ -18,10 +18,10 @@ readings = [4,5,7,2,4,6,5,7]
 # MAKING DOMAIN
 # domain size is from the CAD and in mm
 # the +1 is because np.arange is an exclusive (ie: not inclusive) range
-scale = 5 # used to reduce the number of points in the domain
-X = np.arange(0,427+1,scale)
-Y = np.arange(0,294+1,scale)
-Z = np.arange(0,168+1,scale)
+stepsize = 5 # used to reduce the number of points in the domain
+X = np.arange(0,427+1,stepsize)
+Y = np.arange(0,294+1,stepsize)
+Z = np.arange(0,168+1,stepsize)
 domain = tuple(np.meshgrid(X,Y,Z))
 
 
@@ -85,6 +85,6 @@ fig1.write_html("volume.html")
 
 
 # PLOTTING PLANE
-z_slice = int(65/scale)
+z_slice = 30 # note that this refers to slice index, not to dimensional location
 fig2 = go.Figure(data=go.Heatmap(x=domain[0][0,:,0], y=domain[1][:,0,0], z=result[:,:,z_slice], zsmooth='best'))
 fig2.write_html("plane.html")
