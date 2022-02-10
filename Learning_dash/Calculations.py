@@ -45,7 +45,7 @@ def domain_interp(domain, sensor_locs, readings):
     interp_vals = griddata(sensor_locs, sensor_vals, domain, method='linear')
     return interp_vals
 
-def phase_fractions(interp_vals):
+def SoC(interp_vals):
     # temperature of fusion
     t_fusion = 74
     # total number of points in domain
@@ -56,8 +56,10 @@ def phase_fractions(interp_vals):
     # solid phase
     solid_parts  = np.count_nonzero(interp_vals < t_fusion)
     solid_frac   = solid_parts/total_parts
-    # return fractions
-    return solid_frac, liquid_frac
+    # energy stored (not done yet)
+    stored = 1000
+    # return values
+    return [solid_frac, liquid_frac, stored]
 
 
 # TESTING FUNCTIONS
