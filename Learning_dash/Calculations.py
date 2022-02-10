@@ -16,32 +16,32 @@ readings = [4,5,7,2,4,6,5,7]
 
 
 # MAKING DOMAIN
-# domain size is from the CAD and in cm (rounded)
+# domain size is from the CAD and in mm
 # the +1 is because np.arange is an exclusive (ie: not inclusive) range
-X = np.arange(0,43+1,1)
-Y = np.arange(0,29+1,1)
-Z = np.arange(0,17+1,1)
+scale = 5 # used to reduce the number of points in the domain
+X = np.arange(0,427+1,scale)
+Y = np.arange(0,294+1,scale)
+Z = np.arange(0,168+1,scale)
 domain = tuple(np.meshgrid(X,Y,Z))
 
 
 # SENSOR LOCATIONS
 # stored as coordinates [x,y,z]
-sensor_locs = np.array( [[ 6,  7,  5],
-                         [ 6, 18,  5],
-                         [14, 12,  10],
-                         [14, 23,  10],
-                         [22,  7,  5],
-                         [22, 18,  5],
-                         [30, 12,  10],
-                         [30, 23,  10]] )
-
+sensor_locs = np.array( [[ 60,  72,  49],
+                         [ 60, 177,  49],
+                         [140, 124,  97],
+                         [140, 229,  97],
+                         [220,  72,  49],
+                         [220, 177,  49],
+                         [300, 124,  97],
+                         [300, 229,  97]] )
 
 # DECLARING FUNCTIONS
 def domain_interp(domain, sensor_locs, readings):
     # sensor values
     sensor_vals = np.array(readings).transpose()
     # interpolation
-    interp_vals = griddata(sensor_locs, sensor_vals, domain, method='nearest')
+    interp_vals = griddata(sensor_locs, sensor_vals, domain, method='linear')
     return interp_vals
 
 
@@ -68,6 +68,6 @@ fig1.write_html("volume.html")
 
 
 # PLOTTING PLANE
-z_slice = 5
-fig2 = go.Figure(data=go.Contour(x=domain[0][0,:,0], y=domain[1][:,0,0], z=result[:,:,z_slice]))
+z_slice = int(65/scale)
+fig2 = go.Figure(data=go.Heatmap(x=domain[0][0,:,0], y=domain[1][:,0,0], z=result[:,:,z_slice], zsmooth='best'))
 fig2.write_html("plane.html")
