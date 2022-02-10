@@ -46,9 +46,9 @@ def domain_interp(domain, sensor_locs, readings):
               sensor_locs[:,1],
               sensor_locs[:,2],
               sensor_vals)
-    interp_vals = rbf(domain[0].flatten(),
-                      domain[1].flatten(),
-                      domain[2].flatten())
+    interp_vals = rbf(domain[0],
+                      domain[1],
+                      domain[2])
     return interp_vals
 
 def SoC(interp_vals):
@@ -72,25 +72,25 @@ def SoC(interp_vals):
 result = domain_interp(domain, sensor_locs, readings)
 
 
-# # PLOTTING VOLUME
-# # interpolated field
-# fig1 = go.Figure(data=go.Volume(
-#     x=domain[0].flatten(),
-#     y=domain[1].flatten(),
-#     z=domain[2].flatten(),
-#     value=result.flatten(),
-#     isomin=0,
-#     isomax=10,
-#     opacity=0.1, # needs to be small to see through all surfaces
-#     surface_count=17, # needs to be a large number for good volume rendering
-#     ))
-# # sensor locations
-# fig1.add_trace(go.Scatter3d(x=sensor_locs[:,0], y=sensor_locs[:,1], z=sensor_locs[:,2], mode='markers', marker={'color':'green'}))
-# # save the result
-# fig1.write_html("volume.html")
+# PLOTTING VOLUME
+# interpolated field
+fig1 = go.Figure(data=go.Volume(
+    x=domain[0].flatten(),
+    y=domain[1].flatten(),
+    z=domain[2].flatten(),
+    value=result.flatten(),
+    isomin=0,
+    isomax=10,
+    opacity=0.1, # needs to be small to see through all surfaces
+    surface_count=17, # needs to be a large number for good volume rendering
+    ))
+# sensor locations
+fig1.add_trace(go.Scatter3d(x=sensor_locs[:,0], y=sensor_locs[:,1], z=sensor_locs[:,2], mode='markers', marker={'color':'green'}))
+# save the result
+fig1.write_html("volume.html")
 
 
-# # PLOTTING PLANE
-# z_slice = 30 # note that this refers to slice index, not to dimensional location
-# fig2 = go.Figure(data=go.Heatmap(x=domain[0][0,:,0], y=domain[1][:,0,0], z=result[:,:,z_slice], zsmooth='best'))
-# fig2.write_html("plane.html")
+# PLOTTING PLANE
+z_slice = 30 # note that this refers to slice index, not to dimensional location
+fig2 = go.Figure(data=go.Heatmap(x=domain[0][0,:,0], y=domain[1][:,0,0], z=result[:,:,z_slice], zsmooth='best'))
+fig2.write_html("plane.html")
