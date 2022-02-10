@@ -4,6 +4,7 @@
 
 # IMPORTING LIBRARIES
 # data handling libraries
+import numpy as np
 import pandas as pd
 import serial
 import time
@@ -59,6 +60,12 @@ app.layout = dbc.Container([
             dcc.Graph(id='FIGURE_colourplot', figure={})
             ],
             width=6),
+        # 3D volume (not done yet)
+        ]),
+    # gap
+    dbc.Row(html.Br()),
+    # second row
+    dbc.Row([
         # sensor temps line graph
         dbc.Col(
             [
@@ -66,9 +73,8 @@ app.layout = dbc.Container([
             dcc.Graph(id='FIGURE_temps_line', figure={})
             ],
             width=6)
+        # pie chart (not done yet)
         ]),
-    # second row - pie chart - to be done later
-    # dbc.Row([]),
     # interval for live updates
     dcc.Interval(id='INTERVAL', interval=1000) # fires a callback causing app to update every 'interval' milliseconds
 ], fluid=True)
@@ -77,7 +83,8 @@ app.layout = dbc.Container([
 # CALLBACKS (finish once I've got data coming into pandas ready to graph)
 # live updates from Arduino serial
 @app.callback(
-    
+    Output('FIGURE_colourplot', 'figure'),
+    Input('SLIDER_colourplot', 'value')
 )
 # colourplot
 @app.callback(
