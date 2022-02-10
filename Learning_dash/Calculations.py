@@ -24,40 +24,33 @@ Z = np.arange(0,17+1,1)
 domain = tuple(np.meshgrid(X,Y,Z))
 
 
-# DECLARING FUNCTION
-def domain_interp(readings, domain):
-    
-    # SENSOR LOCATIONS
-    # stored as coordinates [x,y,z]
-    sensor_locs = np.array( [[ 6,  7,  5],
-                             [ 6, 18,  5],
-                             [14, 12,  10],
-                             [14, 23,  10],
-                             [22,  7,  5],
-                             [22, 18,  5],
-                             [30, 12,  10],
-                             [30, 23,  10]] )
-    
-    # PLOTTING SENSOR LOCATIONS
-    fig_locs = go.Figure(data=[go.Scatter3d(x=sensor_locs[:,0], y=sensor_locs[:,1], z=sensor_locs[:,2], mode='markers')])
-    fig_locs.update_layout(scene={  'xaxis': {'nticks': 3, 'range': [0, np.max(domain[0])]},
-                                    'yaxis': {'nticks': 3, 'range': [0, np.max(domain[1])]},
-                                    'zaxis': {'nticks': 3, 'range': [0, np.max(domain[2])]}   })
-    fig_locs.write_html("sensor_locations.html")
-    
-    # SENSOR VALUES
+# SENSOR LOCATIONS
+# stored as coordinates [x,y,z]
+sensor_locs = np.array( [[ 6,  7,  5],
+                         [ 6, 18,  5],
+                         [14, 12,  10],
+                         [14, 23,  10],
+                         [22,  7,  5],
+                         [22, 18,  5],
+                         [30, 12,  10],
+                         [30, 23,  10]] )
+
+
+# DECLARING FUNCTIONS
+def domain_interp(domain, sensor_locs, readings):
+    # sensor values
     sensor_vals = np.array(readings).transpose()
-    
-    # INTERPOLATION
+    # interpolation
     interp_vals = griddata(sensor_locs, sensor_vals, domain, method='nearest')
     return interp_vals
 
 
 # TESTING FUNCTIONS
-result = domain_interp(readings, domain)
+result = domain_interp(domain, sensor_locs, readings)
 
 
-# PLOTTING INTERPOLATED FIELD
+# PLOTTING
+# interpolated field
 fig = go.Figure(data=go.Volume(
     x=domain[0].flatten(),
     y=domain[1].flatten(),
@@ -68,4 +61,7 @@ fig = go.Figure(data=go.Volume(
     opacity=0.1, # needs to be small to see through all surfaces
     surface_count=17, # needs to be a large number for good volume rendering
     ))
+# sensor locations
+fig.add_trace(go.Scatter3d(x=sensor_locs[:,0], y=sensor_locs[:,1], z=sensor_locs[:,2], mode='markers'))
+# save the result
 fig.write_html("volume.html")
