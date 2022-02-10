@@ -5,6 +5,10 @@
 # IMPORTING LIBRARIES
 # data handling libraries
 import pandas as pd
+import serial
+import time
+# calculations Python file
+import Calculations
 # figure making libraries
 import plotly.graph_objects as go
 import plotly.express as px
@@ -12,6 +16,27 @@ import plotly.express as px
 from dash import Dash, html, dcc
 from dash.dependencies import Output, Input
 import dash_bootstrap_components as dbc
+
+
+# DOMAIN
+# domain size is from the CAD and in mm
+# the +1 is because np.arange is an exclusive (ie: not inclusive) range
+stepsize = 5
+X,Y,Z = np.meshgrid(np.arange(0,427+1,stepsize), # domain X axis
+                    np.arange(0,294+1,stepsize), # domain Y axis
+                    np.arange(0,168+1,stepsize), # domain Z axis
+                    indexing='ij')
+
+
+# SENSOR LOCATIONS
+x = np.array([60,  60, 140, 140, 220, 220, 300, 300])
+y = np.array([72, 177, 124, 229,  72, 177, 124, 229])
+z = np.array([49,  49,  97,  97,  49,  49,  97,  97])
+
+
+# DATA SETUP
+ser = serial.Serial('COM3', baudrate=9600, timeout=None) # setup serial. Python waits to recieve \n before reading from serial buffer. Beware that I have not set a timeout value, so it might wait forever
+df = pd.DataFrame(columns = ['Time', 'Sensor 1', 'Sensor 2', 'Sensor 3', 'Sensor 4', 'Sensor 5', 'Sensor 6', 'Sensor 7', 'Sensor 8', 'Solid fraction', 'Liquid fraction', 'Stored'])
 
 
 # START THE APP
@@ -41,13 +66,19 @@ app.layout = dbc.Container([
             dcc.Graph(id='FIGURE_temps_line', figure={})
             ],
             width=6)
-        ])
+        ]),
     # second row - pie chart - to be done later
-    # dbc.Row([])
+    # dbc.Row([]),
+    # interval for live updates
+    dcc.Interval(id='INTERVAL', interval=1000) # fires a callback causing app to update every 'interval' milliseconds
 ], fluid=True)
 
 
 # CALLBACKS (finish once I've got data coming into pandas ready to graph)
+# live updates from Arduino serial
+@app.callback(
+    
+)
 # colourplot
 @app.callback(
     Output('FIGURE_colourplot', 'figure'),
