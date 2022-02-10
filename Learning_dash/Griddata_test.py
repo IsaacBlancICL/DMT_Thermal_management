@@ -6,13 +6,17 @@ playing around to get a feel for the function
 import numpy as np
 from scipy.interpolate import griddata
 
-def func(x, y):
-    return x+y
+def func(x, y, z):
+    return x+y+z
 
-grid_x, grid_y = np.mgrid[0:1:100j, 0:1:200j]
+x = np.linspace(0,1,100)
+y = np.linspace(0,1,100)
+z = np.linspace(0,1,100)
+
+grid_x, grid_y, grid_z = np.meshgrid(x,y,z)
 
 rng = np.random.default_rng()
-points = rng.random((1000, 2))
-values = func(points[:,0], points[:,1])
+points = rng.random((1000, 3))
+values = func(points[:,0], points[:,1], points[:,2])
 
-grid_z0 = griddata(points, values, (grid_x, grid_y), method='nearest')
+grid = griddata(points, values, (grid_x, grid_y, grid_z), method='nearest')
