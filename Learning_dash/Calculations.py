@@ -11,44 +11,31 @@ from scipy.interpolate import Rbf
 import plotly.graph_objects as go
 
 
-# MAKING DEMO READINGS
-readings = [4,5,7,2,4,6,5,7]
-
-
-# MAKING DOMAIN
+# DOMAIN
 # domain size is from the CAD and in mm
 # the +1 is because np.arange is an exclusive (ie: not inclusive) range
-stepsize = 5 # used to reduce the number of points in the domain
-X = np.arange(0,427+1,stepsize)
-Y = np.arange(0,294+1,stepsize)
-Z = np.arange(0,168+1,stepsize)
-domain = tuple(np.meshgrid(X,Y,Z))
+stepsize = 5
+X,Y,Z = np.meshgrid(np.arange(0,427+1,stepsize), # domain X axis
+                    np.arange(0,294+1,stepsize), # domain Y axis
+                    np.arange(0,168+1,stepsize), # domain Z axis
+                    indexing='ij')
 
 
 # SENSOR LOCATIONS
-# stored as coordinates [x,y,z]
-sensor_locs = np.array( [[ 60,  72,  49],
-                         [ 60, 177,  49],
-                         [140, 124,  97],
-                         [140, 229,  97],
-                         [220,  72,  49],
-                         [220, 177,  49],
-                         [300, 124,  97],
-                         [300, 229,  97]] )
+x = np.array([60,  60, 140, 140, 220, 220, 300, 300])
+y = np.array([72, 177, 124, 229,  72, 177, 124, 229])
+z = np.array([49,  49,  97,  97,  49,  49,  97,  97])
+
+
+# DEMO READINGS
+readings = [95,55,76,25,47,97,52,94]
+sensor_vals = np.array(readings).transpose()
 
 
 # DECLARING FUNCTIONS
-def domain_interp(domain, sensor_locs, readings):
-    # sensor values
-    sensor_vals = np.array(readings).transpose()
-    # interpolation
-    rbf = Rbf(sensor_locs[:,0],
-              sensor_locs[:,1],
-              sensor_locs[:,2],
-              sensor_vals)
-    interp_vals = rbf(domain[0],
-                      domain[1],
-                      domain[2])
+def domain_interp(X,Y,Z, x,y,z, sensor_vals):
+    rbf = Rbf(x,y,z,sensor_vals)
+    interp_vals = rbf(X,Y,Z)
     return interp_vals
 
 def SoC(interp_vals):
@@ -69,28 +56,39 @@ def SoC(interp_vals):
 
 
 # TESTING FUNCTIONS
-result = domain_interp(domain, sensor_locs, readings)
+interp_vals = domain_interp(X,Y,Z, x,y,z, sensor_vals)
 
 
 # PLOTTING VOLUME
 # interpolated field
 fig1 = go.Figure(data=go.Volume(
-    x=domain[0].flatten(),
-    y=domain[1].flatten(),
-    z=domain[2].flatten(),
-    value=result.flatten(),
+    x=X.flatten(),
+    y=Y.flatten(),
+    z=Z.flatten(),
+    value=interp_vals.flatten(),
+    # formating options
     isomin=0,
-    isomax=10,
+    isomax=150,
     opacity=0.1, # needs to be small to see through all surfaces
-    surface_count=17, # needs to be a large number for good volume rendering
+    surface_count=17 # needs to be a large number for good volume rendering
     ))
 # sensor locations
-fig1.add_trace(go.Scatter3d(x=sensor_locs[:,0], y=sensor_locs[:,1], z=sensor_locs[:,2], mode='markers', marker={'color':'green'}))
+fig1.add_trace(go.Scatter3d(x=x, y=y, z=z, mode='markers', marker={'color':'green'}))
 # save the result
 fig1.write_html("volume.html")
 
 
 # PLOTTING PLANE
-z_slice = 30 # note that this refers to slice index, not to dimensional location
-fig2 = go.Figure(data=go.Heatmap(x=domain[0][0,:,0], y=domain[1][:,0,0], z=result[:,:,z_slice], zsmooth='best'))
+z_slice = 169 # this refers to the dimensional location
+fig2 = go.Figure(data=go.Contour(
+                                 x=X[:,0,0],
+                                 y=Y[0,:,0],
+                                 z=interp_vals[:,:,int(z_slice/stepsize)].transpose(), # not sure why you have to transpose this, but you do otherwise graph comes out reversed lol
+                                 # formating options
+                                 line_smoothing=0.85,
+                                 contours={'coloring':'heatmap',
+                                           'showlabels':True,
+                                           'labelfont':{'color':'white'} }))
+fig2.update_layout(xaxis_title="x position",
+                   yaxis_title="y position")
 fig2.write_html("plane.html")
