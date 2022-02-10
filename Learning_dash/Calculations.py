@@ -8,7 +8,7 @@ liquid volume fraction, state of charge etc...
 # IMPORTING LIBRARIES
 import numpy as np
 from scipy.interpolate import griddata
-import matplotlib.pyplot as plt
+import plotly.graph_objects as go
 
 
 # MAKING DEMO READINGS
@@ -39,13 +39,11 @@ def domain_interp(readings):
     sensor_vals = np.array(readings).transpose()
     
     # PLOTTING SENSOR LOCATIONS
-    fig = plt.figure()
-    ax = fig.add_subplot(projection='3d')
-    ax.scatter(sensor_locs[:,0], sensor_locs[:,1], sensor_locs[:,2])
-    ax.set_title('Temperature sensor locations')
-    ax.set_xlim(left=0,right=427)
-    ax.set_ylim(bottom=0,top=294)
-    ax.set_zlim(bottom=0,top=168)
+    fig_locs = go.Figure(data=[go.Scatter3d(x=sensor_locs[:,0], y=sensor_locs[:,1], z=sensor_locs[:,2], mode='markers')])
+    fig_locs.update_layout(scene={  'xaxis': {'nticks': 3, 'range': [0, 427]},
+                                    'yaxis': {'nticks': 3, 'range': [0, 294]},
+                                    'zaxis': {'nticks': 3, 'range': [0, 168]}   })
+    fig_locs.write_html("sensor_locations.html")
     
     # INTERPOLATION
     
