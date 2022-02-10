@@ -49,9 +49,9 @@ def domain_interp(domain, sensor_locs, readings):
 result = domain_interp(domain, sensor_locs, readings)
 
 
-# PLOTTING
+# PLOTTING VOLUME
 # interpolated field
-fig = go.Figure(data=go.Volume(
+fig1 = go.Figure(data=go.Volume(
     x=domain[0].flatten(),
     y=domain[1].flatten(),
     z=domain[2].flatten(),
@@ -62,6 +62,12 @@ fig = go.Figure(data=go.Volume(
     surface_count=17, # needs to be a large number for good volume rendering
     ))
 # sensor locations
-fig.add_trace(go.Scatter3d(x=sensor_locs[:,0], y=sensor_locs[:,1], z=sensor_locs[:,2], mode='markers', marker={'color':'green'}))
+fig1.add_trace(go.Scatter3d(x=sensor_locs[:,0], y=sensor_locs[:,1], z=sensor_locs[:,2], mode='markers', marker={'color':'green'}))
 # save the result
-fig.write_html("volume.html")
+fig1.write_html("volume.html")
+
+
+# PLOTTING PLANE
+z_slice = 5
+fig2 = go.Figure(data=go.Contour(x=domain[0][0,:,0], y=domain[1][:,0,0], z=result[:,:,z_slice]))
+fig2.write_html("plane.html")
