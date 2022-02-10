@@ -10,6 +10,12 @@ import time
 # make dataframe
 df = pd.DataFrame(columns = ['Time', 'Sensor 1', 'Sensor 2', 'Sensor 3', 'Sensor 4', 'Sensor 5', 'Sensor 6', 'Sensor 7', 'Sensor 8', 'Solid fraction', 'Liquid fraction', 'Stored'])
 
+
+
+
+
+
+
 # reading serial to list
 serialLine = ser.readline().decode('ascii')
 sensor_list = # serialLine
