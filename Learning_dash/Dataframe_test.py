@@ -10,12 +10,17 @@ import time
 # make dataframe
 df = pd.DataFrame(columns = ['Time', 'Sensor 1', 'Sensor 2', 'Sensor 3', 'Sensor 4', 'Sensor 5', 'Sensor 6', 'Sensor 7', 'Sensor 8', 'Solid fraction', 'Liquid fraction', 'Stored'])
 
-for i in range (0,5):
-    # entering data
-    sensor_list = [1,2,3,4,5,6,7,8]
-    calcs_list = [1,2,3]
-    df.loc[len(df.index)] = [time.strftime("%H:%M:%S", time.localtime())] + sensor_list + calcs_list
-    
-    # saving to csv
-    filename = 'filename.csv'
-    df.to_csv(filename, index=False)
+# reading serial to list
+serialLine = ser.readline().decode('ascii')
+sensor_list = # serialLine
+
+# calculating stuff
+interp_vals = domain_interp(domain, sensor_locs, readings)
+calcs_list = SoC(interp_vals)
+
+# putting calculation results in DataFrame
+df.loc[len(df.index)] = [time.strftime("%H:%M:%S", time.localtime())] + sensor_list + calcs_list
+
+# saving DataFrame to csv
+filename = 'filename.csv'
+df.to_csv(filename, index=False)
