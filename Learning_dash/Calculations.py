@@ -15,18 +15,20 @@ import plotly.graph_objects as go
 readings = [4,5,7,2,4,6,5,7]
 
 
+# MAKING DOMAIN
+# domain size is from the CAD and in mm
+# the +1 is because np.arange is an exclusive (ie: not inclusive) range
+X = np.arange(0,427+1,1)
+Y = np.arange(0,294+1,1)
+Z = np.arange(0,168+1,1)
+domain = tuple(np.meshgrid(X,Y,Z))
+
+
 # DECLARING FUNCTION
-def domain_interp(readings):
+def domain_interp(readings, domain):
     
-    # DOMAIN
-    # domain size is from the CAD and in mm
-    X = np.arange(0,427,1)
-    Y = np.arange(0,294,1)
-    Z = np.arange(0,168,1)
-    X,Y,Z = np.meshgrid(X,Y,Z)
-    
-    # SENSORS
-    # locations for all 8 sensors stored as coordinates [x,y,z]
+    # SENSOR LOCATIONS
+    # stored as coordinates [x,y,z]
     sensor_locs = np.array( [[ 60,  72,  49],
                              [ 60, 177,  49],
                              [140, 124,  97],
@@ -35,20 +37,35 @@ def domain_interp(readings):
                              [220, 177,  49],
                              [300, 124,  97],
                              [300, 229,  97]] )
-    # values from all 8 sensors
-    sensor_vals = np.array(readings).transpose()
     
     # PLOTTING SENSOR LOCATIONS
-    fig_locs = go.Figure(data=[go.Scatter3d(x=sensor_locs[:,0], y=sensor_locs[:,1], z=sensor_locs[:,2], mode='markers')])
-    fig_locs.update_layout(scene={  'xaxis': {'nticks': 3, 'range': [0, 427]},
-                                    'yaxis': {'nticks': 3, 'range': [0, 294]},
-                                    'zaxis': {'nticks': 3, 'range': [0, 168]}   })
-    fig_locs.write_html("sensor_locations.html")
+    # fig_locs = go.Figure(data=[go.Scatter3d(x=sensor_locs[:,0], y=sensor_locs[:,1], z=sensor_locs[:,2], mode='markers')])
+    # fig_locs.update_layout(scene={  'xaxis': {'nticks': 3, 'range': [0, np.max(domain[0])]},
+    #                                 'yaxis': {'nticks': 3, 'range': [0, np.max(domain[1])]},
+    #                                 'zaxis': {'nticks': 3, 'range': [0, np.max(domain[2])]}   })
+    # fig_locs.write_html("sensor_locations.html")
+    
+    # SENSOR VALUES
+    sensor_vals = np.array(readings).transpose()
     
     # INTERPOLATION
-    interp_vals = griddata(sensor_locs, sensor_vals, (X,Y,Z), method='nearest')
-    
+    interp_vals = griddata(sensor_locs, sensor_vals, domain, method='nearest')
     return interp_vals
 
+
 # TESTING FUNCTIONS
-result = domain_interp(readings)
+result = domain_interp(readings, domain)
+
+
+# PLOTTING INTERPOLATED FIELD
+fig = go.Figure(data=go.Volume(
+    x=domain[0].flatten(),
+    y=domain[1].flatten(),
+    z=domain[2].flatten(),
+    value=result.flatten(),
+    isomin=0,
+    isomax=10,
+    opacity=0.1, # needs to be small to see through all surfaces
+    surface_count=17, # needs to be a large number for good volume rendering
+    ))
+fig.write_html("volume.html")
