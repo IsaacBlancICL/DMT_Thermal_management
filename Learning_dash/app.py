@@ -28,6 +28,8 @@ X,Y,Z = np.meshgrid(np.arange(0,427+1,stepsize), # domain X axis
                     np.arange(0,294+1,stepsize), # domain Y axis
                     np.arange(0,168+1,stepsize), # domain Z axis
                     indexing='ij')
+# initial z_slice (for colourplot)
+z_slice = 84
 
 
 # SENSOR LOCATIONS
@@ -57,7 +59,7 @@ app.layout = dbc.Container([
         # colourplot
         dbc.Col(
             [
-            dcc.Slider(id='SLIDER_colourplot', min=0, max=100, step=1, value=50, marks={0:'0mm', 25:'42mm', 50:'84mm', 75:'126mm', 100:'168mm'}),
+            dcc.Slider(id='SLIDER_colourplot', min=0, max=100, step=1, value=z_slice, marks={0:'0mm', 25:'42mm', 50:'84mm', 75:'126mm', 100:'168mm'}),
             dcc.Graph(id='FIGURE_colourplot', figure={})
             ],
             width=6),
@@ -89,20 +91,19 @@ app.layout = dbc.Container([
 
 # CALLBACKS (finish once I've got data coming into pandas ready to graph)    
 # interval
-@app.callback(
-    [Output('FIGURE_colourplot', 'figure'),
-     Output('FIGURE_volume', 'figure'),
-     Output('FIGURE_temps_line', 'figure'),
-     Output('FIGURE_pie', 'figure')],
-    Input('INTERVAL', 'n_intervals')
-)
-def update_graph(n_intervals):
+@app.callback( [Output('FIGURE_colourplot', 'figure'),
+                Output('FIGURE_volume', 'figure'),
+                Output('FIGURE_temps_line', 'figure'),
+                Output('FIGURE_pie', 'figure')],
+                Input('INTERVAL', 'n_intervals') )
+def update_general(n_intervals):
     # DATA
     # reading serial to list
     serialLine = ser.readline().decode('ascii').rstrip().split(',')
     sensor_list = [float(item) for item in serialLine]
     sensor_vals = np.array(sensor_list).transpose()
     # calculating stuff
+    global interp_vals # because must be accessed by colourplot callback function
     interp_vals = calc.domain_interp(X,Y,Z, x,y,z, sensor_vals)
     calcs_list = calc.SoC(interp_vals)
     # putting calculation results in DataFrame
@@ -116,7 +117,7 @@ def update_graph(n_intervals):
     colourplot = go.Figure(data=go.Contour(
                                      x=X[:,0,0],
                                      y=Y[0,:,0],
-                                     z=interp_vals[:,:,int(84/stepsize)].transpose(), # not sure why you have to transpose this, but you do otherwise graph comes out reversed lol
+                                     z=interp_vals[:,:,int(z_slice/stepsize)].transpose(), # not sure why you have to transpose this, but you do otherwise graph comes out reversed lol
                                      # formating options
                                      line_smoothing=0.85,
                                      contours={'coloring':'heatmap',
@@ -161,11 +162,40 @@ def update_graph(n_intervals):
     # RETURN
     return colourplot, volume, temps_line, pie
 
+
+# # colourplot z-position slider
+# @app.callback( Output('FIGURE_colourplot', 'figure'),
+#                Input('SLIDER_colourplot', 'value') )
+# def update_colourplot(value):
+#     # VARIABLE
+#     z_slice = value
+    
+#     # FIGURE
+#     # colourplot (copied from interval callback function - must be the same here!)
+#     colourplot = go.Figure(data=go.Contour(
+#                                      x=X[:,0,0],
+#                                      y=Y[0,:,0],
+#                                      z=interp_vals[:,:,int(z_slice/stepsize)].transpose(), # not sure why you have to transpose this, but you do otherwise graph comes out reversed lol
+#                                      # formating options
+#                                      line_smoothing=0.85,
+#                                      contours={'coloring':'heatmap',
+#                                                'showlabels':True,
+#                                                'labelfont':{'color':'white'} }))
+#     colourplot.update_layout(xaxis_title="x position",
+#                        yaxis_title="y position",
+#                        margin={'l':20, 'r':20, 't':5, 'b':20},
+#                        uirevision="Don't change")
+    
+#     # RETURN
+#     return colourplot
              
+
+
+
 # RUNNING DASHBOARD
 if __name__ == '__main__':
     app.run_server(debug=False, use_reloader=False)
 
 
-# CLOSING
+# CLOSING SERIAL PORT
 ser.close()
