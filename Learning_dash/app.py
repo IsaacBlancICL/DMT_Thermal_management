@@ -9,14 +9,14 @@ import pandas as pd
 import serial
 import time
 # calculations Python file
-import Calculations
+import Calculations as calc
 # figure making libraries
 import plotly.graph_objects as go
-import plotly.express as px
 # dash libraries
 from dash import Dash, html, dcc
 from dash.dependencies import Output, Input
 import dash_bootstrap_components as dbc
+from dash.exceptions import PreventUpdate
 
 
 # DOMAIN
@@ -76,34 +76,70 @@ app.layout = dbc.Container([
         # pie chart (not done yet)
         ]),
     # interval for live updates
-    dcc.Interval(id='INTERVAL', interval=1000) # fires a callback causing app to update every 'interval' milliseconds
+    dcc.Interval(id='INTERVAL', interval=1900) # fires a callback causing app to update every 'interval' milliseconds
 ], fluid=True)
 
 
 # CALLBACKS (finish once I've got data coming into pandas ready to graph)
 # live updates from Arduino serial
 @app.callback(
-    Output('FIGURE_colourplot', 'figure'),
-    Input('SLIDER_colourplot', 'value')
+    [Output('FIGURE_colourplot','figure')],
+    [Input('INTERVAL','n_intervals')]
 )
-# colourplot
-@app.callback(
-    Output('FIGURE_colourplot', 'figure'),
-    Input('SLIDER_colourplot', 'value')
-)
-def update_graph(value):
-    fig = 
-    return fig
-# sensor temps line graph
-@app.callback(
-    Output('FIGURE_temps_line', 'figure'),
-    Input('DROPDOWN_temps_line', 'value')
-)
-def update_graph(value):
-    fig = 
-    return fig
+def update_everything(n_intervals): # pretty sure 'n_intervals' is a dummy variable here - ie: I'm not gonna use it but I still have to include it as an argument
+    if n_intervals==0:
+        raise PreventUpdate
+    else:
+        # GETTING NEW DATA    
+        # reading serial to list
+        serialLine = ser.readline().decode('ascii').rstrip().split(',')
+        sensor_list = list(map(int,serialLine))
+        sensor_vals = np.array(sensor_list).transpose()
+        # calculating stuff
+        interp_vals = calc.domain_interp(X,Y,Z, x,y,z, sensor_vals)
+        calcs_list = calc.SoC(interp_vals)
+        # putting calculation results in DataFrame
+        df.loc[len(df.index)] = [time.strftime("%H:%M:%S", time.localtime())] + sensor_list + calcs_list
+        # saving DataFrame to csv
+        filename = 'filename.csv'
+        df.to_csv(filename, index=False)
+        
+        # # MAKING NEW GRAPHS
+        # # colourplot
+        # z_slice = 169 # this refers to the dimensional location
+        # fig1 = go.Figure(data=go.Contour(
+        #                                  x=X[:,0,0],
+        #                                  y=Y[0,:,0],
+        #                                  z=interp_vals[:,:,int(z_slice/stepsize)].transpose(), # not sure why you have to transpose this, but you do otherwise graph comes out reversed lol
+        #                                  # formating options
+        #                                  line_smoothing=0.85,
+        #                                  contours={'coloring':'heatmap',
+        #                                            'showlabels':True,
+        #                                            'labelfont':{'color':'white'} }))
+        # fig1.update_layout(xaxis_title="x position",
+        #                    yaxis_title="y position")
+        
+        # # RETURNING STUFF
+        # return fig1
+    
+# # colourplot
+# @app.callback(
+#     Output('FIGURE_colourplot', 'figure'),
+#     Input('SLIDER_colourplot', 'value')
+# )
+# def update_graph(value):
+#     fig = 
+#     return fig
+# # sensor temps line graph
+# @app.callback(
+#     Output('FIGURE_temps_line', 'figure'),
+#     Input('DROPDOWN_temps_line', 'value')
+# )
+# def update_graph(value):
+#     fig = 
+#     return fig
 
              
 # RUNNING DASHBOARD
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(debug=False)
