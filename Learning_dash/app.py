@@ -124,7 +124,8 @@ def update_graph(n_intervals):
                                                'labelfont':{'color':'white'} }))
     colourplot.update_layout(xaxis_title="x position",
                        yaxis_title="y position",
-                       margin={'l':20, 'r':20, 't':5, 'b':20})
+                       margin={'l':20, 'r':20, 't':5, 'b':20},
+                       uirevision="Don't change")
     # volume
     volume = go.Figure(data=go.Volume(
         x=X.flatten(),
@@ -138,13 +139,15 @@ def update_graph(n_intervals):
         surface_count=5 # needs to be a large number for good volume rendering
         ))
     volume.add_trace(go.Scatter3d(x=x, y=y, z=z, mode='markers', marker={'color':'green'}))
+    volume.update_layout(uirevision="Don't change")
     # temps line
     temps_line = px.line(df,
                          x="Time",
                          y=["Sensor 1","Sensor 2","Sensor 3","Sensor 4","Sensor 5","Sensor 6","Sensor 7","Sensor 8",])
     temps_line.update_layout(xaxis_title="Time",
                        yaxis_title="Temperature (deg C)",
-                       margin={'l':20, 'r':20, 't':5, 'b':20})
+                       margin={'l':20, 'r':20, 't':5, 'b':20},
+                       uirevision="Don't change")
     # pie
     pie = px.pie(values=df.iloc[-1][['Solid fraction','Liquid fraction']].tolist(),
                  names=['Solid fraction','Liquid fraction'],

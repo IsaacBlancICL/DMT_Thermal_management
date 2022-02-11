@@ -1,5 +1,7 @@
 '''
 copied from: https://iotespresso.com/preserving-zoom-settings-across-data-refresh-in-dash/
+
+Focus on the .update_layout function.
 '''
 
 
@@ -17,3 +19,9 @@ def update_realtime_fig(json1):
     )
     fig.update_yaxes(title_text="Rate", secondary_y=False)
     return fig
+
+
+
+
+# the (hopefully) important bit
+fig.update_layout(uirevision="Don't change")
