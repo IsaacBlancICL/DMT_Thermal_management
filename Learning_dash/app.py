@@ -133,6 +133,9 @@ def update_general(n_intervals):
         ))
     volume.add_trace(go.Scatter3d(x=x, y=y, z=z, mode='markers', marker={'color':'green'}))
     volume.update_layout(margin={'l':10, 'r':10, 't':5, 'b':5},
+                         scene_camera={'up':     {'x':0,   'y':0,   'z':1    },
+                                       'center': {'x':0,   'y':-0.2,'z':-0.2 },
+                                       'eye':    {'x':1.5, 'y':1.5, 'z':0.4  }},
                          uirevision="Don't change")
     # temps line
     temps_line = px.line(df,
