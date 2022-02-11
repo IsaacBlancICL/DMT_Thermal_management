@@ -39,6 +39,7 @@ z = np.array([49,  49,  97,  97,  49,  49,  97,  97])
 ser = serial.Serial('COM3', baudrate=9600, timeout=None)
 df = pd.DataFrame(columns = ['Time', 'Sensor 1', 'Sensor 2', 'Sensor 3', 'Sensor 4', 'Sensor 5', 'Sensor 6', 'Sensor 7', 'Sensor 8', 'Solid fraction', 'Liquid fraction', 'Stored'])
 
+
 # START THE APP
 app = Dash(__name__, update_title=None, external_stylesheets=[dbc.themes.DARKLY]) # maybe change to FLATLY?
 
@@ -109,4 +110,4 @@ def update_graph(n_intervals):
              
 # RUNNING DASHBOARD
 if __name__ == '__main__':
-    app.run_server(debug=True, use_reloader=False)
+    app.run_server(debug=False, use_reloader=False)
