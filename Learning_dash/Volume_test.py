@@ -42,13 +42,17 @@ volume = go.Figure(data=go.Volume(
     isomin=0,
     isomax=150,
     opacity=0.1, # needs to be small to see through all surfaces
-    surface_count=5 # needs to be a large number for good volume rendering
+    surface_count=5, # needs to be a large number for good volume rendering
+    colorbar={'tickfont':{'color':'white'}}
     ))
 volume.add_trace(go.Scatter3d(x=x, y=y, z=z, mode='markers', marker={'color':'green'}))
 volume.update_layout(margin={'l':10, 'r':10, 't':5, 'b':5},
-                     scene_camera={'up':     {'x':0,   'y':0,   'z':1    },
-                                   'center': {'x':0,   'y':-0.2,'z':-0.1 },
-                                   'eye':    {'x':1.5, 'y':1.5, 'z':0.4  }},
+                     scene = {'xaxis':{'color':'white'},
+                              'yaxis':{'color':'white'},
+                              'zaxis':{'color':'white'},
+                              'camera':{'up':     {'x':0,   'y':0,   'z':1    },
+                                        'center': {'x':0,   'y':-0.2,'z':-0.1 },
+                                        'eye':    {'x':1.5, 'y':1.5, 'z':0.4  }}},
                      uirevision="Don't change")
 
 volume.write_html("volume.html")

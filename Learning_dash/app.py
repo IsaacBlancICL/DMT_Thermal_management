@@ -16,7 +16,6 @@ import plotly.express as px
 # dash libraries
 from dash import Dash, html, dcc
 import dash_bootstrap_components as dbc
-from dash.exceptions import PreventUpdate
 from dash_extensions.enrich import Output, DashProxy, Input, MultiplexerTransform
 
 
@@ -52,33 +51,28 @@ app.layout = dbc.Container([
     # title and intro text
     dbc.Row(html.Br()),
     dbc.Row(dbc.Col(html.H1("Thermal management dashboard"),width=6)),
-    dbc.Row(dbc.Col(html.P("The Arduino reads the 8 temperature sensors using the OneWire library and sends the values to my laptop via serial. A Python running on my laptop script recieves these values using Pyserial and inter/extrapolates the temperature field across the whole volume of PCM. This inter/extrapolation is done using the Rbf (radial basis function) method from scipy.interpolate. I won't say here what function Rbf is set to use, since it was a total guess and I'll likely change it once I try using the code on some real data. From this interpolated temperature field (which is just a big array of grid points), the script estimates the fractions of solid and liquid phase by volume (proportions of points below and above the fusion temperature), as well as the energy stored (not coded yet). The temperature sensor results and the subsequent calculated results are saved into a Pandas DataFrame, which is re-saved to a .csv file each time new data is added, for security. The temperature sensor readings, interpolated field and calculated results are all graphed below. Graphs were made with plotly.graph_objects and plotly.express. The graphs are somewhat interactive and automatically update each time new data is recieved from the Arduino. Currently, this is set to happen every 10 seconds, so the graphs are 'real-time' to within that period. This dashboard was made with Dash. All the libraries mentioned are Python, apart from the OneWire Arduino library."),width=12)),
-    dbc.Row(html.Br()),
+    dbc.Row(dbc.Col(html.P("The Arduino reads the 8 temperature sensors using the OneWire library and sends the values to my laptop via serial. A Python running on my laptop script recieves these values using Pyserial and inter/extrapolates the temperature field across the whole volume of PCM. This inter/extrapolation is done using the Rbf (radial basis function) method from scipy.interpolate. I won't say here what function Rbf is set to use, since it was a total guess and I'll likely change it once I try using the code on some real data. From this interpolated temperature field (which is just a big array of grid points), the script estimates the fractions of solid and liquid phase by volume (proportions of points below and above the fusion temperature), as well as the energy stored (not coded yet). The temperature sensor results and the subsequent calculated results are saved into a Pandas DataFrame, which is re-saved to a .csv file each time new data is added, for security. The temperature sensor readings, interpolated field and calculated results are all graphed below. The '2D slice distribution' graph shows the temperature distribution at a given z-distance from the bottom of the PCM. This distance is set by the slider on the left. Graphs were made with plotly.graph_objects and plotly.express. The graphs are somewhat interactive and automatically update each time new data is recieved from the Arduino. Currently, this is set to happen every 10 seconds, so the graphs are 'real-time' to within that period. This dashboard was made with Dash. All the libraries mentioned are Python, apart from the OneWire Arduino library."),width=12)),
     dbc.Row(html.Br()),
     # first row titles
     dbc.Row([
         dbc.Col(html.H4("2D slice distribution", className='text-center'),width=6),
         dbc.Col(html.H4("3D volume distribution", className='text-center'),width=6)
         ]),
-    # first row - colourplot and sensor temps line graph
+    # first row - slider, colourplot and sensor temps line graph
     dbc.Row([
+        # slider
+        dbc.Col(dcc.Slider(id='SLIDER_colourplot',
+                           min=0,
+                           max=1,
+                           step=0.01,
+                           value=Z_slice, # initial value
+                           marks={0:'0mm', 0.25:'42mm', 0.50:'84mm', 0.75:'126mm', 1:'168mm'},
+                           vertical='True',
+                           updatemode='drag'), width=1),
         # colourplot
-        dbc.Col(
-            [
-            dcc.Slider(id='SLIDER_colourplot',
-                       min=0,
-                       max=1,
-                       step=0.01,
-                       value=Z_slice, # initial value
-                       marks={0:'0mm', 0.25:'42mm', 0.50:'84mm', 0.75:'126mm', 1:'168mm'},
-                       updatemode='drag'),
-            dcc.Graph(id='FIGURE_colourplot', figure={})
-            ],
-            width=6),
+        dbc.Col(dcc.Graph(id='FIGURE_colourplot', figure={}), width=5),
         # 3D volume
-        dbc.Col(
-            dcc.Graph(id='FIGURE_volume', figure={}),
-            width=6)
+        dbc.Col(dcc.Graph(id='FIGURE_volume', figure={}), width=6)
         ]),
     # gap
     dbc.Row(html.Br()),
@@ -90,7 +84,8 @@ app.layout = dbc.Container([
     # second row
     dbc.Row([
         # sensor temps line graph
-        dbc.Col( dcc.Graph(id='FIGURE_temps_line', figure={}), width=6),
+        dbc.Col(width=1),
+        dbc.Col( dcc.Graph(id='FIGURE_temps_line', figure={}), width=5),
         # pie chart
         dbc.Col( dcc.Graph(id='FIGURE_pie', figure={}), width=6)
         ]),
@@ -132,10 +127,12 @@ def update_general(n_intervals):
                                      line_smoothing=0.85,
                                      contours={'coloring':'heatmap',
                                                'showlabels':True,
-                                               'labelfont':{'color':'white'} }))
+                                               'labelfont':{'color':'white'} },
+                                     colorbar={'tickfont':{'color':'white'}}
+                                     ))
     colourplot.update_layout(xaxis_title="x position",
                        yaxis_title="y position",
-                       margin={'l':20, 'r':20, 't':5, 'b':20},
+                       margin={'l':0, 'r':20, 't':5, 'b':20},
                        paper_bgcolor='rgba(0,0,0,0)',
                        plot_bgcolor='rgba(0,0,0,0)',
                        uirevision="Don't change")
@@ -153,13 +150,17 @@ def update_general(n_intervals):
         isomin=0,
         isomax=150,
         opacity=0.1, # needs to be small to see through all surfaces
-        surface_count=5 # needs to be a large number for good volume rendering
+        surface_count=5, # needs to be a large number for good volume rendering
+        colorbar={'tickfont':{'color':'white'}}
         ))
     volume.add_trace(go.Scatter3d(x=x, y=y, z=z, mode='markers', marker={'color':'green'}))
     volume.update_layout(margin={'l':10, 'r':10, 't':5, 'b':5},
-                         scene_camera={'up':     {'x':0,   'y':0,   'z':1    },
-                                       'center': {'x':0,   'y':-0.2,'z':-0.2 },
-                                       'eye':    {'x':1.5, 'y':1.5, 'z':0.4  }},
+                         scene = {'xaxis':{'color':'white'},
+                                  'yaxis':{'color':'white'},
+                                  'zaxis':{'color':'white'},
+                                  'camera':{'up':     {'x':0,   'y':0,   'z':1    },
+                                            'center': {'x':0,   'y':-0.2,'z':-0.1 },
+                                            'eye':    {'x':1.5, 'y':1.5, 'z':0.4  }}},
                          paper_bgcolor='rgba(0,0,0,0)',
                          plot_bgcolor='rgba(0,0,0,0)',
                          uirevision="Don't change")
@@ -217,10 +218,12 @@ def update_colourplot(value):
                                       line_smoothing=0.85,
                                       contours={'coloring':'heatmap',
                                                 'showlabels':True,
-                                                'labelfont':{'color':'white'} }))
+                                                'labelfont':{'color':'white'} },
+                                      colorbar={'tickfont':{'color':'white'}}
+                                      ))
     colourplot.update_layout(xaxis_title="x position",
                         yaxis_title="y position",
-                        margin={'l':20, 'r':20, 't':5, 'b':20},
+                        margin={'l':0, 'r':20, 't':5, 'b':20},
                         paper_bgcolor='rgba(0,0,0,0)',
                         plot_bgcolor='rgba(0,0,0,0)',
                         uirevision="Don't change")
