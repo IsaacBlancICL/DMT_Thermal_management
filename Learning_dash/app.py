@@ -35,12 +35,7 @@ y = np.array([72, 177, 124, 229,  72, 177, 124, 229])
 z = np.array([49,  49,  97,  97,  49,  49,  97,  97])
 
 
-# INTERP
-interp_vals = calc.domain_interp(X,Y,Z, x,y,z, np.array([95,55,76,25,47,97,52,94]).transpose())
-
-
 # DATA SETUP
-ser = serial.Serial('COM3', baudrate=9600, timeout=None) # setup serial. Python waits to recieve \n before reading from serial buffer. Beware that I have not set a timeout value, so it might wait forever
 df = pd.DataFrame(columns = ['Time', 'Sensor 1', 'Sensor 2', 'Sensor 3', 'Sensor 4', 'Sensor 5', 'Sensor 6', 'Sensor 7', 'Sensor 8', 'Solid fraction', 'Liquid fraction', 'Stored'])
 
 # START THE APP
@@ -90,6 +85,15 @@ app.layout = dbc.Container([
     Input('SLIDER_colourplot', 'value')
 )
 def update_graph(value):
+    # serial
+    ser = serial.Serial('COM3', baudrate=9600, timeout=None)
+    serialLine = ser.readline().decode('ascii').rstrip().split(',')
+    ser.close()
+    sensor_list = list(map(int,serialLine))
+    sensor_vals = np.array(sensor_list).transpose()
+    # interp
+    interp_vals = calc.domain_interp(X,Y,Z, x,y,z, sensor_vals)
+    # figure
     fig = go.Figure(data=go.Contour(
                                      x=X[:,0,0],
                                      y=Y[0,:,0],
