@@ -72,16 +72,9 @@ app.layout = dbc.Container([
     # second row
     dbc.Row([
         # sensor temps line graph
-        dbc.Col(
-            [
-            dcc.Dropdown(id='DROPDOWN_temps_line', options=['Sensor 1', 'Sensor 2', 'Sensor 3', 'Sensor 4', 'Sensor 5', 'Sensor 6', 'Sensor 7', 'Sensor 8'], value=[], multi=True, placeholder="Select which temperature sensors you want to view data for..."),
-            dcc.Graph(id='FIGURE_temps_line', figure={})
-            ],
-            width=6),
+        dbc.Col( dcc.Graph(id='FIGURE_temps_line', figure={}), width=6),
         # pie chart
-        dbc.Col(
-            dcc.Graph(id='FIGURE_pie', figure={}),
-            width=6)
+        dbc.Col( dcc.Graph(id='FIGURE_pie', figure={}), width=6)
         ]),
     # interval for live updates
     dcc.Interval(id='INTERVAL', interval=9900) # fires a callback causing app to update every 'interval' milliseconds
@@ -139,7 +132,8 @@ def update_general(n_intervals):
         surface_count=5 # needs to be a large number for good volume rendering
         ))
     volume.add_trace(go.Scatter3d(x=x, y=y, z=z, mode='markers', marker={'color':'green'}))
-    volume.update_layout(uirevision="Don't change")
+    volume.update_layout(margin={'l':10, 'r':10, 't':5, 'b':5},
+                         uirevision="Don't change")
     # temps line
     temps_line = px.line(df,
                          x="Time",
