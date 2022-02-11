@@ -61,7 +61,10 @@ app.layout = dbc.Container([
             dcc.Graph(id='FIGURE_colourplot', figure={})
             ],
             width=6),
-        # 3D volume (not done yet)
+        # 3D volume
+        dbc.Col(
+            dcc.Graph(id='FIGURE_volume', figure={}),
+            width=6)
         ]),
     # gap
     dbc.Row(html.Br()),
@@ -73,8 +76,11 @@ app.layout = dbc.Container([
             dcc.Dropdown(id='DROPDOWN_temps_line', options=['Sensor 1', 'Sensor 2', 'Sensor 3', 'Sensor 4', 'Sensor 5', 'Sensor 6', 'Sensor 7', 'Sensor 8'], value=[], multi=True, placeholder="Select which temperature sensors you want to view data for..."),
             dcc.Graph(id='FIGURE_temps_line', figure={})
             ],
+            width=6),
+        # pie chart
+        dbc.Col(
+            dcc.Graph(id='FIGURE_pie', figure={}),
             width=6)
-        # pie chart (not done yet)
         ]),
     # interval for live updates
     dcc.Interval(id='INTERVAL', interval=1900) # fires a callback causing app to update every 'interval' milliseconds
@@ -85,7 +91,9 @@ app.layout = dbc.Container([
 # interval
 @app.callback(
     [Output('FIGURE_colourplot', 'figure'),
-     Output('FIGURE_temps_line', 'figure')],
+     Output('FIGURE_volume', 'figure'),
+     Output('FIGURE_temps_line', 'figure'),
+     Output('FIGURE_pie', 'figure')],
     Input('INTERVAL', 'n_intervals')
 )
 def update_graph(n_intervals):
@@ -105,7 +113,7 @@ def update_graph(n_intervals):
     
     # FIGURES
     # colourplot
-    fig1 = go.Figure(data=go.Contour(
+    colourplot = go.Figure(data=go.Contour(
                                      x=X[:,0,0],
                                      y=Y[0,:,0],
                                      z=interp_vals[:,:,int(84/stepsize)].transpose(), # not sure why you have to transpose this, but you do otherwise graph comes out reversed lol
@@ -114,17 +122,32 @@ def update_graph(n_intervals):
                                      contours={'coloring':'heatmap',
                                                'showlabels':True,
                                                'labelfont':{'color':'white'} }))
-    fig1.update_layout(xaxis_title="x position",
+    colourplot.update_layout(xaxis_title="x position",
                        yaxis_title="y position",
                        margin={'l':20, 'r':20, 't':5, 'b':20})
+    # volume
+    volume = go.Figure(data=go.Volume(
+        x=X.flatten(),
+        y=Y.flatten(),
+        z=Z.flatten(),
+        value=interp_vals.flatten(),
+        # formating options
+        isomin=0,
+        isomax=150,
+        opacity=0.1, # needs to be small to see through all surfaces
+        surface_count=17 # needs to be a large number for good volume rendering
+        ))
+    volume.add_trace(go.Scatter3d(x=x, y=y, z=z, mode='markers', marker={'color':'green'}))
     # temps line
-    fig2 = px.line(df, x="Time", y=["Sensor 1","Sensor 2","Sensor 3","Sensor 4","Sensor 5","Sensor 6","Sensor 7","Sensor 8",])
-    fig2.update_layout(xaxis_title="Time",
+    temps_line = px.line(df, x="Time", y=["Sensor 1","Sensor 2","Sensor 3","Sensor 4","Sensor 5","Sensor 6","Sensor 7","Sensor 8",])
+    temps_line.update_layout(xaxis_title="Time",
                        yaxis_title="Temperature (deg C)",
                        margin={'l':20, 'r':20, 't':5, 'b':20})
+    # pie
+    pie = px.pie(df.tail(1), names=['Liquid','Solid'], values=['Solid fraction','Liquid fraction'], title='Volumetric phase fractions')
     
     # RETURN
-    return fig1, fig2
+    return colourplot, volume, temps_line, pie
 
              
 # RUNNING DASHBOARD
