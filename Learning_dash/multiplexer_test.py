@@ -7,6 +7,7 @@ import dash_html_components as html
 from dash_extensions.enrich import Output, DashProxy, Input, MultiplexerTransform
 
 app = DashProxy(prevent_initial_callbacks=True, transforms=[MultiplexerTransform()])
+
 app.layout = html.Div([html.Button("left", id="left"), html.Button("right", id="right"), html.Div(id="log")])
 
 
