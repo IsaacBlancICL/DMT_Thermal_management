@@ -12,6 +12,7 @@ import time
 import Calculations as calc
 # figure making libraries
 import plotly.graph_objects as go
+import plotly.express as px
 # dash libraries
 from dash import Dash, html, dcc
 from dash.dependencies import Output, Input
@@ -41,7 +42,7 @@ df = pd.DataFrame(columns = ['Time', 'Sensor 1', 'Sensor 2', 'Sensor 3', 'Sensor
 
 
 # START THE APP
-app = Dash(__name__, update_title=None, external_stylesheets=[dbc.themes.DARKLY]) # maybe change to FLATLY?
+app = Dash(__name__, update_title=None, external_stylesheets=[dbc.themes.FLATLY]) # maybe change to DARKLY and make graphs transparent?
 
 
 # LAYOUT
@@ -83,7 +84,8 @@ app.layout = dbc.Container([
 # CALLBACKS (finish once I've got data coming into pandas ready to graph)    
 # interval
 @app.callback(
-    Output('FIGURE_colourplot', 'figure'),
+    [Output('FIGURE_colourplot', 'figure'),
+     Output('FIGURE_temps_line', 'figure')],
     Input('INTERVAL', 'n_intervals')
 )
 def update_graph(n_intervals):
@@ -103,7 +105,7 @@ def update_graph(n_intervals):
     
     # FIGURES
     # colourplot
-    fig = go.Figure(data=go.Contour(
+    fig1 = go.Figure(data=go.Contour(
                                      x=X[:,0,0],
                                      y=Y[0,:,0],
                                      z=interp_vals[:,:,int(84/stepsize)].transpose(), # not sure why you have to transpose this, but you do otherwise graph comes out reversed lol
@@ -112,13 +114,23 @@ def update_graph(n_intervals):
                                      contours={'coloring':'heatmap',
                                                'showlabels':True,
                                                'labelfont':{'color':'white'} }))
-    fig.update_layout(xaxis_title="x position",
-                       yaxis_title="y position")
+    fig1.update_layout(xaxis_title="x position",
+                       yaxis_title="y position",
+                       margin={'l':20, 'r':20, 't':5, 'b':20})
+    # temps line
+    fig2 = px.line(df, x="Time", y=["Sensor 1","Sensor 2","Sensor 3","Sensor 4","Sensor 5","Sensor 6","Sensor 7","Sensor 8",])
+    fig2.update_layout(xaxis_title="Time",
+                       yaxis_title="Temperature (deg C)",
+                       margin={'l':20, 'r':20, 't':5, 'b':20})
     
     # RETURN
-    return fig
+    return fig1, fig2
 
              
 # RUNNING DASHBOARD
 if __name__ == '__main__':
     app.run_server(debug=False, use_reloader=False)
+
+
+# CLOSING
+ser.close()
