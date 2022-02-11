@@ -35,13 +35,16 @@ y = np.array([72, 177, 124, 229,  72, 177, 124, 229])
 z = np.array([49,  49,  97,  97,  49,  49,  97,  97])
 
 
+# INTERP
+interp_vals = calc.domain_interp(X,Y,Z, x,y,z, np.array([95,55,76,25,47,97,52,94]).transpose())
+
+
 # DATA SETUP
 ser = serial.Serial('COM3', baudrate=9600, timeout=None) # setup serial. Python waits to recieve \n before reading from serial buffer. Beware that I have not set a timeout value, so it might wait forever
 df = pd.DataFrame(columns = ['Time', 'Sensor 1', 'Sensor 2', 'Sensor 3', 'Sensor 4', 'Sensor 5', 'Sensor 6', 'Sensor 7', 'Sensor 8', 'Solid fraction', 'Liquid fraction', 'Stored'])
 
-
 # START THE APP
-app = Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
+app = Dash(__name__, external_stylesheets=[dbc.themes.DARKLY]) # maybe change to FLATLY?
 
 
 # LAYOUT
@@ -80,56 +83,25 @@ app.layout = dbc.Container([
 ], fluid=True)
 
 
-# CALLBACKS (finish once I've got data coming into pandas ready to graph)
-# live updates from Arduino serial
+# CALLBACKS (finish once I've got data coming into pandas ready to graph)    
+# colourplot
 @app.callback(
-    [Output('FIGURE_colourplot','figure')],
-    [Input('INTERVAL','n_intervals')]
+    Output('FIGURE_colourplot', 'figure'),
+    Input('SLIDER_colourplot', 'value')
 )
-def update_everything(n_intervals): # pretty sure 'n_intervals' is a dummy variable here - ie: I'm not gonna use it but I still have to include it as an argument
-    if n_intervals==0:
-        raise PreventUpdate
-    else:
-        # GETTING NEW DATA    
-        # reading serial to list
-        serialLine = ser.readline().decode('ascii').rstrip().split(',')
-        sensor_list = list(map(int,serialLine))
-        sensor_vals = np.array(sensor_list).transpose()
-        # calculating stuff
-        interp_vals = calc.domain_interp(X,Y,Z, x,y,z, sensor_vals)
-        calcs_list = calc.SoC(interp_vals)
-        # putting calculation results in DataFrame
-        df.loc[len(df.index)] = [time.strftime("%H:%M:%S", time.localtime())] + sensor_list + calcs_list
-        # saving DataFrame to csv
-        filename = 'filename.csv'
-        df.to_csv(filename, index=False)
-        
-        # # MAKING NEW GRAPHS
-        # # colourplot
-        # z_slice = 169 # this refers to the dimensional location
-        # fig1 = go.Figure(data=go.Contour(
-        #                                  x=X[:,0,0],
-        #                                  y=Y[0,:,0],
-        #                                  z=interp_vals[:,:,int(z_slice/stepsize)].transpose(), # not sure why you have to transpose this, but you do otherwise graph comes out reversed lol
-        #                                  # formating options
-        #                                  line_smoothing=0.85,
-        #                                  contours={'coloring':'heatmap',
-        #                                            'showlabels':True,
-        #                                            'labelfont':{'color':'white'} }))
-        # fig1.update_layout(xaxis_title="x position",
-        #                    yaxis_title="y position")
-        
-        # # RETURNING STUFF
-        # return fig1
-    
-# # colourplot
-# @app.callback(
-#     Output('FIGURE_colourplot', 'figure'),
-#     Input('SLIDER_colourplot', 'value')
-# )
-# def update_graph(value):
-#     fig = 
-#     return fig
+def update_graph(value):
+    fig = go.Figure(data=go.Contour(
+                                     x=X[:,0,0],
+                                     y=Y[0,:,0],
+                                     z=interp_vals[:,:,int(value/stepsize)].transpose(), # not sure why you have to transpose this, but you do otherwise graph comes out reversed lol
+                                     # formating options
+                                     line_smoothing=0.85,
+                                     contours={'coloring':'heatmap',
+                                               'showlabels':True,
+                                               'labelfont':{'color':'white'} }))
+    fig.update_layout(xaxis_title="x position",
+                       yaxis_title="y position")
+    return fig
 # # sensor temps line graph
 # @app.callback(
 #     Output('FIGURE_temps_line', 'figure'),
