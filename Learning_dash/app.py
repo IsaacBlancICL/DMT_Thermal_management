@@ -44,7 +44,7 @@ df = pd.DataFrame(columns = ['Time', 'Sensor 1', 'Sensor 2', 'Sensor 3', 'Sensor
 
 
 # START THE APP
-app = DashProxy(prevent_initial_callbacks=True, transforms=[MultiplexerTransform()], update_title=None, external_stylesheets=[dbc.themes.FLATLY])
+app = DashProxy(prevent_initial_callbacks=True, transforms=[MultiplexerTransform()], update_title=None, external_stylesheets=[dbc.themes.DARKLY])
 
 # LAYOUT
 app.layout = dbc.Container([
@@ -118,6 +118,8 @@ def update_general(n_intervals):
     colourplot.update_layout(xaxis_title="x position",
                        yaxis_title="y position",
                        margin={'l':20, 'r':20, 't':5, 'b':20},
+                       paper_bgcolor='rgba(0,0,0,0)',
+                       plot_bgcolor='rgba(0,0,0,0)',
                        uirevision="Don't change")
     # volume
     volume = go.Figure(data=go.Volume(
@@ -136,6 +138,8 @@ def update_general(n_intervals):
                          scene_camera={'up':     {'x':0,   'y':0,   'z':1    },
                                        'center': {'x':0,   'y':-0.2,'z':-0.2 },
                                        'eye':    {'x':1.5, 'y':1.5, 'z':0.4  }},
+                         paper_bgcolor='rgba(0,0,0,0)',
+                         plot_bgcolor='rgba(0,0,0,0)',
                          uirevision="Don't change")
     # temps line
     temps_line = px.line(df,
@@ -154,6 +158,8 @@ def update_general(n_intervals):
                  title='Volumetric phase fractions',
                  hole=0.4)
     pie.update_traces(sort=False)
+    pie.update_layout(paper_bgcolor='rgba(0,0,0,0)',
+                      plot_bgcolor='rgba(0,0,0,0)')
     
     # RETURN
     return colourplot, volume, temps_line, pie
@@ -180,6 +186,8 @@ def update_colourplot(value):
     colourplot.update_layout(xaxis_title="x position",
                         yaxis_title="y position",
                         margin={'l':20, 'r':20, 't':5, 'b':20},
+                        paper_bgcolor='rgba(0,0,0,0)',
+                        plot_bgcolor='rgba(0,0,0,0)',
                         uirevision="Don't change")
     
     # RETURN
