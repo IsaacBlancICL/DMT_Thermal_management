@@ -81,19 +81,28 @@ app.layout = dbc.Container([
 
 
 # CALLBACKS (finish once I've got data coming into pandas ready to graph)    
-# colourplot
+# interval
 @app.callback(
     Output('FIGURE_colourplot', 'figure'),
     Input('INTERVAL', 'n_intervals')
 )
 def update_graph(n_intervals):
-    # serial
+    # DATA
+    # reading serial to list
     serialLine = ser.readline().decode('ascii').rstrip().split(',')
     sensor_list = [float(item) for item in serialLine]
     sensor_vals = np.array(sensor_list).transpose()
-    # interp
+    # calculating stuff
     interp_vals = calc.domain_interp(X,Y,Z, x,y,z, sensor_vals)
-    # figure
+    calcs_list = calc.SoC(interp_vals)
+    # putting calculation results in DataFrame
+    df.loc[len(df.index)] = [time.strftime("%H:%M:%S", time.localtime())] + sensor_list + calcs_list
+    # saving DataFrame to csv
+    filename = 'filename.csv'
+    df.to_csv(filename, index=False)
+    
+    # FIGURES
+    # colourplot
     fig = go.Figure(data=go.Contour(
                                      x=X[:,0,0],
                                      y=Y[0,:,0],
@@ -105,6 +114,8 @@ def update_graph(n_intervals):
                                                'labelfont':{'color':'white'} }))
     fig.update_layout(xaxis_title="x position",
                        yaxis_title="y position")
+    
+    # RETURN
     return fig
 
              
