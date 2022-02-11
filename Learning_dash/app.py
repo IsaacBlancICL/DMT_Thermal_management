@@ -28,8 +28,9 @@ X,Y,Z = np.meshgrid(np.arange(0,427+1,stepsize), # domain X axis
                     np.arange(0,294+1,stepsize), # domain Y axis
                     np.arange(0,168+1,stepsize), # domain Z axis
                     indexing='ij')
-# initial z_slice (for colourplot)
-z_slice = 84
+# for colourplot
+Z_slice = 0.5 # initial slice (as a fraction of full depth)
+Z_total = len(Z[0,0,:])-1
 
 
 # SENSOR LOCATIONS
@@ -51,14 +52,26 @@ app.layout = dbc.Container([
     # title and intro text
     dbc.Row(html.Br()),
     dbc.Row(dbc.Col(html.H1("Thermal management dashboard"),width=6)),
-    dbc.Row(dbc.Col(html.P("This is very much a work-in-progress, but I'm hoping to have lots of nice graphs here. For now, I want a colourplot with a slider for adjusting depth, a multi-series line graph where you can choose which sensors to look at, and a pie chart for phase fractions. Also maybe another line graph showing history of phase fractions. Maybe also some state of charge estimation."),width=6)),
+    dbc.Row(dbc.Col(html.P("The Arduino reads the 8 temperature sensors using the OneWire library and sends the values to my laptop via serial. A Python running on my laptop script recieves these values using Pyserial and inter/extrapolates the temperature field across the whole volume of PCM. This inter/extrapolation is done using the Rbf (radial basis function) method from scipy.interpolate. I won't say here what function Rbf is set to use, since it was a total guess and I'll likely change it once I try using the code on some real data. From this interpolated temperature field (which is just a big array of grid points), the script estimates the fractions of solid and liquid phase by volume (proportions of points below and above the fusion temperature), as well as the energy stored (not coded yet). The temperature sensor results and the subsequent calculated results are saved into a Pandas DataFrame, which is re-saved to a .csv file each time new data is added, for security. The temperature sensor readings, interpolated field and calculated results are all graphed below. Graphs were made with plotly.graph_objects and plotly.express. The graphs are somewhat interactive and automatically update each time new data is recieved from the Arduino. Currently, this is set to happen every 10 seconds, so the graphs are 'real-time' to within that period. This dashboard was made with Dash. All the libraries mentioned are Python, apart from the OneWire Arduino library."),width=12)),
     dbc.Row(html.Br()),
+    dbc.Row(html.Br()),
+    # first row titles
+    dbc.Row([
+        dbc.Col(html.H4("2D slice distribution", className='text-center'),width=6),
+        dbc.Col(html.H4("3D volume distribution", className='text-center'),width=6)
+        ]),
     # first row - colourplot and sensor temps line graph
     dbc.Row([
         # colourplot
         dbc.Col(
             [
-            dcc.Slider(id='SLIDER_colourplot', min=0, max=100, step=1, value=z_slice, marks={0:'0mm', 25:'42mm', 50:'84mm', 75:'126mm', 100:'168mm'}),
+            dcc.Slider(id='SLIDER_colourplot',
+                       min=0,
+                       max=1,
+                       step=0.01,
+                       value=Z_slice, # initial value
+                       marks={0:'0mm', 0.25:'42mm', 0.50:'84mm', 0.75:'126mm', 1:'168mm'},
+                       updatemode='drag'),
             dcc.Graph(id='FIGURE_colourplot', figure={})
             ],
             width=6),
@@ -69,6 +82,11 @@ app.layout = dbc.Container([
         ]),
     # gap
     dbc.Row(html.Br()),
+    # second row titles
+    dbc.Row([
+        dbc.Col(html.H4("Sensor temperatures", className='text-center'),width=6),
+        dbc.Col(html.H4("Phase volume fractions", className='text-center'),width=6)
+        ]),
     # second row
     dbc.Row([
         # sensor temps line graph
@@ -109,7 +127,7 @@ def update_general(n_intervals):
     colourplot = go.Figure(data=go.Contour(
                                      x=X[:,0,0],
                                      y=Y[0,:,0],
-                                     z=interp_vals[:,:,int(z_slice/stepsize)].transpose(), # not sure why you have to transpose this, but you do otherwise graph comes out reversed lol
+                                     z=interp_vals[:,:,int(Z_slice*Z_total)].transpose(), # not sure why you have to transpose this, but you do otherwise graph comes out reversed lol
                                      # formating options
                                      line_smoothing=0.85,
                                      contours={'coloring':'heatmap',
@@ -121,6 +139,10 @@ def update_general(n_intervals):
                        paper_bgcolor='rgba(0,0,0,0)',
                        plot_bgcolor='rgba(0,0,0,0)',
                        uirevision="Don't change")
+    colourplot.update_xaxes(color='white',
+                            linecolor='rgba(0,0,0,0)')
+    colourplot.update_yaxes(color='white',
+                            linecolor='rgba(0,0,0,0)')
     # volume
     volume = go.Figure(data=go.Volume(
         x=X.flatten(),
@@ -146,20 +168,33 @@ def update_general(n_intervals):
                          x="Time",
                          y=["Sensor 1","Sensor 2","Sensor 3","Sensor 4","Sensor 5","Sensor 6","Sensor 7","Sensor 8",])
     temps_line.update_layout(xaxis_title="Time",
-                       yaxis_title="Temperature (deg C)",
-                       margin={'l':20, 'r':20, 't':5, 'b':20},
-                       uirevision="Don't change")
+                             yaxis_title="Temperature (deg C)",
+                             margin={'l':20, 'r':20, 't':5, 'b':20},
+                             paper_bgcolor='rgba(0,0,0,0)',
+                             plot_bgcolor='rgba(0,0,0,0)',
+                             legend={'title':None,
+                                     'font':{'color':'white'},
+                                     'y':0.5},
+                             uirevision="Don't change")
+    temps_line.update_xaxes(color='white',
+                            showgrid=False)
+    temps_line.update_yaxes(color='white',
+                            showgrid=False)
     # pie
     pie = px.pie(values=df.iloc[-1][['Solid fraction','Liquid fraction']].tolist(),
                  names=['Solid fraction','Liquid fraction'],
                  color=['Solid fraction','Liquid fraction'],
                  color_discrete_map={'Solid fraction' :'#5A17A2',
                                      'Liquid fraction':'#F3C939'},
-                 title='Volumetric phase fractions',
                  hole=0.4)
-    pie.update_traces(sort=False)
-    pie.update_layout(paper_bgcolor='rgba(0,0,0,0)',
+    pie.update_layout(showlegend=False,
+                      paper_bgcolor='rgba(0,0,0,0)',
                       plot_bgcolor='rgba(0,0,0,0)')
+    pie.update_traces(sort=False,
+                      textposition='inside',
+                      textinfo='percent+label',
+                      hovertemplate=None,
+                      hoverinfo='skip')
     
     # RETURN
     return colourplot, volume, temps_line, pie
@@ -170,14 +205,14 @@ def update_general(n_intervals):
                 Input('SLIDER_colourplot', 'value') )
 def update_colourplot(value):
     # VARIABLE
-    z_slice = value
+    Z_slice = value
     
     # FIGURE
     # colourplot (copied from interval callback function - must be the same here!)
     colourplot = go.Figure(data=go.Contour(
                                       x=X[:,0,0],
                                       y=Y[0,:,0],
-                                      z=interp_vals[:,:,int(z_slice/stepsize)].transpose(), # not sure why you have to transpose this, but you do otherwise graph comes out reversed lol
+                                      z=interp_vals[:,:,int(Z_slice*Z_total)].transpose(), # not sure why you have to transpose this, but you do otherwise graph comes out reversed lol
                                       # formating options
                                       line_smoothing=0.85,
                                       contours={'coloring':'heatmap',
@@ -189,6 +224,10 @@ def update_colourplot(value):
                         paper_bgcolor='rgba(0,0,0,0)',
                         plot_bgcolor='rgba(0,0,0,0)',
                         uirevision="Don't change")
+    colourplot.update_xaxes(color='white',
+                            linecolor='rgba(0,0,0,0)')
+    colourplot.update_yaxes(color='white',
+                            linecolor='rgba(0,0,0,0)')
     
     # RETURN
     return colourplot

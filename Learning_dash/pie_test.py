@@ -8,8 +8,14 @@ pie = px.pie(values=df.iloc[-1][['Solid fraction','Liquid fraction']].tolist(),
              color=['Solid fraction','Liquid fraction'],
              color_discrete_map={'Solid fraction' :'#5A17A2',
                                  'Liquid fraction':'#F3C939'},
-             title='Volumetric phase fractions',
              hole=0.4)
-pie.update_traces(sort=False)
+pie.update_layout(showlegend=False,
+                  paper_bgcolor='rgba(0,0,0,0)',
+                  plot_bgcolor='rgba(0,0,0,0)')
+pie.update_traces(sort=False,
+                  textposition='inside',
+                  textinfo='percent+label',
+                  hovertemplate=None,
+                  hoverinfo='skip')
 
 pie.write_html('pie.html')
