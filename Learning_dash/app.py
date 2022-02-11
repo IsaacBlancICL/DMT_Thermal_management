@@ -44,7 +44,7 @@ ser = serial.Serial('COM3', baudrate=9600, timeout=None) # setup serial. Python 
 df = pd.DataFrame(columns = ['Time', 'Sensor 1', 'Sensor 2', 'Sensor 3', 'Sensor 4', 'Sensor 5', 'Sensor 6', 'Sensor 7', 'Sensor 8', 'Solid fraction', 'Liquid fraction', 'Stored'])
 
 # START THE APP
-app = Dash(__name__, external_stylesheets=[dbc.themes.DARKLY]) # maybe change to FLATLY?
+app = Dash(__name__, update_title=None, external_stylesheets=[dbc.themes.DARKLY]) # maybe change to FLATLY?
 
 
 # LAYOUT
@@ -102,14 +102,6 @@ def update_graph(value):
     fig.update_layout(xaxis_title="x position",
                        yaxis_title="y position")
     return fig
-# # sensor temps line graph
-# @app.callback(
-#     Output('FIGURE_temps_line', 'figure'),
-#     Input('DROPDOWN_temps_line', 'value')
-# )
-# def update_graph(value):
-#     fig = 
-#     return fig
 
              
 # RUNNING DASHBOARD
