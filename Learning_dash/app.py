@@ -15,9 +15,9 @@ import plotly.graph_objects as go
 import plotly.express as px
 # dash libraries
 from dash import Dash, html, dcc
-from dash.dependencies import Output, Input
 import dash_bootstrap_components as dbc
 from dash.exceptions import PreventUpdate
+from dash_extensions.enrich import Output, DashProxy, Input, MultiplexerTransform
 
 
 # DOMAIN
@@ -44,8 +44,7 @@ df = pd.DataFrame(columns = ['Time', 'Sensor 1', 'Sensor 2', 'Sensor 3', 'Sensor
 
 
 # START THE APP
-app = Dash(__name__, update_title=None, external_stylesheets=[dbc.themes.FLATLY]) # maybe change to DARKLY and make graphs transparent?
-
+app = DashProxy(prevent_initial_callbacks=True, transforms=[MultiplexerTransform()], update_title=None, external_stylesheets=[dbc.themes.FLATLY])
 
 # LAYOUT
 app.layout = dbc.Container([
@@ -164,30 +163,30 @@ def update_general(n_intervals):
 
 
 # # colourplot z-position slider
-# @app.callback( Output('FIGURE_colourplot', 'figure'),
-#                Input('SLIDER_colourplot', 'value') )
-# def update_colourplot(value):
-#     # VARIABLE
-#     z_slice = value
+@app.callback( Output('FIGURE_colourplot', 'figure'),
+                Input('SLIDER_colourplot', 'value') )
+def update_colourplot(value):
+    # VARIABLE
+    z_slice = value
     
-#     # FIGURE
-#     # colourplot (copied from interval callback function - must be the same here!)
-#     colourplot = go.Figure(data=go.Contour(
-#                                      x=X[:,0,0],
-#                                      y=Y[0,:,0],
-#                                      z=interp_vals[:,:,int(z_slice/stepsize)].transpose(), # not sure why you have to transpose this, but you do otherwise graph comes out reversed lol
-#                                      # formating options
-#                                      line_smoothing=0.85,
-#                                      contours={'coloring':'heatmap',
-#                                                'showlabels':True,
-#                                                'labelfont':{'color':'white'} }))
-#     colourplot.update_layout(xaxis_title="x position",
-#                        yaxis_title="y position",
-#                        margin={'l':20, 'r':20, 't':5, 'b':20},
-#                        uirevision="Don't change")
+    # FIGURE
+    # colourplot (copied from interval callback function - must be the same here!)
+    colourplot = go.Figure(data=go.Contour(
+                                      x=X[:,0,0],
+                                      y=Y[0,:,0],
+                                      z=interp_vals[:,:,int(z_slice/stepsize)].transpose(), # not sure why you have to transpose this, but you do otherwise graph comes out reversed lol
+                                      # formating options
+                                      line_smoothing=0.85,
+                                      contours={'coloring':'heatmap',
+                                                'showlabels':True,
+                                                'labelfont':{'color':'white'} }))
+    colourplot.update_layout(xaxis_title="x position",
+                        yaxis_title="y position",
+                        margin={'l':20, 'r':20, 't':5, 'b':20},
+                        uirevision="Don't change")
     
-#     # RETURN
-#     return colourplot
+    # RETURN
+    return colourplot
              
 
 
