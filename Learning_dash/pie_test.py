@@ -1,14 +1,15 @@
 import pandas as pd
-import plotly.graph_objects as go
+import plotly.express as px
 
 df = pd.read_csv('filename.csv')
 
-pie = go.Figure(data=go.Pie(
-    labels=['Solid fraction','Liquid fraction'],
-    values=df.iloc[-1][['Solid fraction','Liquid fraction']].tolist(),
-    title='Volumetric phase fractions',
-    # color_discrete_map={'Solid fraction' :'rgba(90,23,162,255)',
-    #                     'Liquid fraction':'rgba(243,201,57,255)'},
-    hole=0.4))
+pie = px.pie(values=df.iloc[-1][['Solid fraction','Liquid fraction']].tolist(),
+             names=['Solid fraction','Liquid fraction'],
+             color=['Solid fraction','Liquid fraction'],
+             color_discrete_map={'Solid fraction' :'#5A17A2',
+                                 'Liquid fraction':'#F3C939'},
+             title='Volumetric phase fractions',
+             hole=0.4)
+pie.update_traces(sort=False)
 
 pie.write_html('pie.html')

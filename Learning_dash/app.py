@@ -91,7 +91,7 @@ app.layout = dbc.Container([
 # interval
 @app.callback(
     [Output('FIGURE_colourplot', 'figure'),
-     Output('FIGURE_volume', 'figure'),
+     # Output('FIGURE_volume', 'figure'),
      Output('FIGURE_temps_line', 'figure'),
      Output('FIGURE_pie', 'figure')],
     Input('INTERVAL', 'n_intervals')
@@ -125,29 +125,38 @@ def update_graph(n_intervals):
     colourplot.update_layout(xaxis_title="x position",
                        yaxis_title="y position",
                        margin={'l':20, 'r':20, 't':5, 'b':20})
-    # volume
-    volume = go.Figure(data=go.Volume(
-        x=X.flatten(),
-        y=Y.flatten(),
-        z=Z.flatten(),
-        value=interp_vals.flatten(),
-        # formating options
-        isomin=0,
-        isomax=150,
-        opacity=0.1, # needs to be small to see through all surfaces
-        surface_count=17 # needs to be a large number for good volume rendering
-        ))
-    volume.add_trace(go.Scatter3d(x=x, y=y, z=z, mode='markers', marker={'color':'green'}))
+    # # volume
+    # volume = go.Figure(data=go.Volume(
+    #     x=X.flatten(),
+    #     y=Y.flatten(),
+    #     z=Z.flatten(),
+    #     value=interp_vals.flatten(),
+    #     # formating options
+    #     isomin=0,
+    #     isomax=150,
+    #     opacity=0.1, # needs to be small to see through all surfaces
+    #     surface_count=17 # needs to be a large number for good volume rendering
+    #     ))
+    # volume.add_trace(go.Scatter3d(x=x, y=y, z=z, mode='markers', marker={'color':'green'}))
     # temps line
-    temps_line = px.line(df, x="Time", y=["Sensor 1","Sensor 2","Sensor 3","Sensor 4","Sensor 5","Sensor 6","Sensor 7","Sensor 8",])
+    temps_line = px.line(df,
+                         x="Time",
+                         y=["Sensor 1","Sensor 2","Sensor 3","Sensor 4","Sensor 5","Sensor 6","Sensor 7","Sensor 8",])
     temps_line.update_layout(xaxis_title="Time",
                        yaxis_title="Temperature (deg C)",
                        margin={'l':20, 'r':20, 't':5, 'b':20})
     # pie
-    pie = px.pie(df.tail(1), names=['Liquid','Solid'], values=['Solid fraction','Liquid fraction'], title='Volumetric phase fractions')
+    pie = px.pie(values=df.iloc[-1][['Solid fraction','Liquid fraction']].tolist(),
+                 names=['Solid fraction','Liquid fraction'],
+                 color=['Solid fraction','Liquid fraction'],
+                 color_discrete_map={'Solid fraction' :'#5A17A2',
+                                     'Liquid fraction':'#F3C939'},
+                 title='Volumetric phase fractions',
+                 hole=0.4)
+    pie.update_traces(sort=False)
     
     # RETURN
-    return colourplot, volume, temps_line, pie
+    return colourplot, temps_line, pie
 
              
 # RUNNING DASHBOARD
