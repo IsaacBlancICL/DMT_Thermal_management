@@ -2,7 +2,7 @@
 sends dummy serial data for testing with Python
 */
 
-#define PERIOD 2000
+#define PERIOD 10000
 
 // SETUP
 void setup(void)

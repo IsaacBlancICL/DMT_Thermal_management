@@ -83,7 +83,7 @@ app.layout = dbc.Container([
             width=6)
         ]),
     # interval for live updates
-    dcc.Interval(id='INTERVAL', interval=1900) # fires a callback causing app to update every 'interval' milliseconds
+    dcc.Interval(id='INTERVAL', interval=9900) # fires a callback causing app to update every 'interval' milliseconds
 ], fluid=True)
 
 
@@ -91,7 +91,7 @@ app.layout = dbc.Container([
 # interval
 @app.callback(
     [Output('FIGURE_colourplot', 'figure'),
-     # Output('FIGURE_volume', 'figure'),
+     Output('FIGURE_volume', 'figure'),
      Output('FIGURE_temps_line', 'figure'),
      Output('FIGURE_pie', 'figure')],
     Input('INTERVAL', 'n_intervals')
@@ -125,19 +125,19 @@ def update_graph(n_intervals):
     colourplot.update_layout(xaxis_title="x position",
                        yaxis_title="y position",
                        margin={'l':20, 'r':20, 't':5, 'b':20})
-    # # volume
-    # volume = go.Figure(data=go.Volume(
-    #     x=X.flatten(),
-    #     y=Y.flatten(),
-    #     z=Z.flatten(),
-    #     value=interp_vals.flatten(),
-    #     # formating options
-    #     isomin=0,
-    #     isomax=150,
-    #     opacity=0.1, # needs to be small to see through all surfaces
-    #     surface_count=17 # needs to be a large number for good volume rendering
-    #     ))
-    # volume.add_trace(go.Scatter3d(x=x, y=y, z=z, mode='markers', marker={'color':'green'}))
+    # volume
+    volume = go.Figure(data=go.Volume(
+        x=X.flatten(),
+        y=Y.flatten(),
+        z=Z.flatten(),
+        value=interp_vals.flatten(),
+        # formating options
+        isomin=0,
+        isomax=150,
+        opacity=0.1, # needs to be small to see through all surfaces
+        surface_count=5 # needs to be a large number for good volume rendering
+        ))
+    volume.add_trace(go.Scatter3d(x=x, y=y, z=z, mode='markers', marker={'color':'green'}))
     # temps line
     temps_line = px.line(df,
                          x="Time",
@@ -156,7 +156,7 @@ def update_graph(n_intervals):
     pie.update_traces(sort=False)
     
     # RETURN
-    return colourplot, temps_line, pie
+    return colourplot, volume, temps_line, pie
 
              
 # RUNNING DASHBOARD
