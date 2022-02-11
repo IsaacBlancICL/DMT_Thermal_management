@@ -88,7 +88,7 @@ app.layout = dbc.Container([
 def update_graph(n_intervals):
     # serial
     serialLine = ser.readline().decode('ascii').rstrip().split(',')
-    sensor_list = list(map(int,serialLine))
+    sensor_list = [float(item) for item in serialLine]
     sensor_vals = np.array(sensor_list).transpose()
     # interp
     interp_vals = calc.domain_interp(X,Y,Z, x,y,z, sensor_vals)

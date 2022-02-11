@@ -34,8 +34,12 @@ ser = serial.Serial('COM3', baudrate=9600, timeout=None) # setup serial. Python 
 while(1):
     # reading serial to list
     serialLine = ser.readline().decode('ascii').rstrip().split(',')
-    sensor_list = list(map(int,serialLine))
+    sensor_list = [float(item) for item in serialLine]
     sensor_vals = np.array(sensor_list).transpose()
+    
+    # printing stuff
+    print('serialLine',serialLine)
+    print('sensor_list',sensor_list)
     
     # calculating stuff
     interp_vals = calc.domain_interp(X,Y,Z, x,y,z, sensor_vals)
