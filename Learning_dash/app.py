@@ -83,9 +83,9 @@ app.layout = dbc.Container([
 # colourplot
 @app.callback(
     Output('FIGURE_colourplot', 'figure'),
-    Input('SLIDER_colourplot', 'value')
+    Input('INTERVAL', 'n_intervals')
 )
-def update_graph(value):
+def update_graph(n_intervals):
     # serial
     serialLine = ser.readline().decode('ascii').rstrip().split(',')
     sensor_list = list(map(int,serialLine))
@@ -96,7 +96,7 @@ def update_graph(value):
     fig = go.Figure(data=go.Contour(
                                      x=X[:,0,0],
                                      y=Y[0,:,0],
-                                     z=interp_vals[:,:,int(value/stepsize)].transpose(), # not sure why you have to transpose this, but you do otherwise graph comes out reversed lol
+                                     z=interp_vals[:,:,int(84/stepsize)].transpose(), # not sure why you have to transpose this, but you do otherwise graph comes out reversed lol
                                      # formating options
                                      line_smoothing=0.85,
                                      contours={'coloring':'heatmap',
