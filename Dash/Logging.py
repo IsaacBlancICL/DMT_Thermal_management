@@ -1,11 +1,15 @@
+'''
+A hastily reduced version of the file app.py
+
+Just reads the data from the Arduino via serial and saves it, without doing any of the calculations or dash stuff in app.py
+'''
+
 # IMPORTING LIBRARIES
 # data handling libraries
 import numpy as np
 import pandas as pd
 import serial
 import time
-# calculations Python file
-import Calculations as calc
 
 
 # DATA SETUP
