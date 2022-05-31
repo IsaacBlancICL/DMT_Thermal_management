@@ -16,17 +16,21 @@ import time
 ser = serial.Serial('COM3', baudrate=9600, timeout=None)
 df = pd.DataFrame(columns = ['Time', 'Sensor 1', 'Sensor 2', 'Sensor 3', 'Sensor 4', 'Sensor 5', 'Sensor 6', 'Sensor 7', 'Sensor 8'])
 
-# reading serial to list
-serialLine = ser.readline().decode('ascii').rstrip().split(',')
-sensor_list = [float(item) for item in serialLine]
-sensor_vals = np.array(sensor_list).transpose()
+while True:
+    # reading serial to list
+    serialLine = ser.readline().decode('ascii').rstrip().split(',')
+    sensor_list = [float(item) for item in serialLine]
+    sensor_vals = np.array(sensor_list).transpose()
+    
+    # putting results in DataFrame
+    df.loc[len(df.index)] = [time.strftime("%H:%M:%S", time.localtime())] + sensor_list
+    # saving DataFrame to csv
+    filename = 'Storage - PCM temps.csv'
+    df.to_csv(filename, index=False)
+    
+    time.sleep(10)
 
-# putting calculation results in DataFrame
-df.loc[len(df.index)] = [time.strftime("%H:%M:%S", time.localtime())] + sensor_list
-# saving DataFrame to csv
-filename = 'test_run_1.csv'
-df.to_csv(filename, index=False)
-
+    
 
 # CLOSING SERIAL PORT
 ser.close()

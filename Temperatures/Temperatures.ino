@@ -26,7 +26,7 @@ OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature sensors(&oneWire);
 
 // Define measurement time period in milliseconds - ie: how often the Arduino will make a new set of measurements
-#define PERIOD 1000
+#define PERIOD 10000
 
 // Addresses of 8 DS18B20 sensors
 uint8_t sensor1[8] = { 0x28, 0xBD, 0x51, 0x88, 0x31, 0x21, 0x03, 0x5C };
